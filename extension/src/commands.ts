@@ -63,6 +63,20 @@ export function registerCommands(
   );
 }
 
+function toWslMountPath(fsPath: string): string {
+  const normalizedPath = fsPath.replace(/\\/g, "/");
+  const driveMatch = normalizedPath.match(/^([A-Za-z]):(\/.*)?$/);
+
+  if (!driveMatch) {
+    return normalizedPath;
+  }
+
+  const driveLetter = driveMatch[1].toLowerCase();
+  const pathWithoutDrive = driveMatch[2] ?? "";
+
+  return `/mnt/${driveLetter}${pathWithoutDrive}`;
+}
+
 async function indexCurrentWorkspaceCommand(): Promise<void> {
   const ws = vscode.workspace.workspaceFolders?.[0];
   if (!ws) {
@@ -71,9 +85,10 @@ async function indexCurrentWorkspaceCommand(): Promise<void> {
   }
   // The engine is the authority on indexing. Surface a clear instruction
   // the AI assistant can act on and copy the prompt to the clipboard.
-  const prompt = `Use SocratiCode to index this project: call codebase_index for ${ws.uri.fsPath}.`;
+  const workspacePath = toWslMountPath(ws.uri.fsPath);
+  const prompt = `Use SocratiCode to index this project: call codebase_index for \`${workspacePath}\`.`;  
   await vscode.env.clipboard.writeText(prompt);
-  log(`indexCurrentWorkspace: prompt copied for ${ws.uri.fsPath}`);
+  log(`indexCurrentWorkspace: prompt copied for ${workspacePath}`);
   const action = await vscode.window.showInformationMessage(
     "Prompt copied to clipboard. Paste it into your AI assistant chat to index this workspace.",
     "Open chat",
