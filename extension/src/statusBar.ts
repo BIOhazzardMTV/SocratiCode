@@ -13,7 +13,7 @@ let item: vscode.StatusBarItem | undefined;
 
 export function registerStatusBar(context: vscode.ExtensionContext): void {
   item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 50);
-  item.command = "workbench.view.extension.socraticode";
+  item.command = "socraticode.indexCurrentWorkspace";
   context.subscriptions.push(item);
 
   refresh();
@@ -34,6 +34,6 @@ function refresh(): void {
     return;
   }
   item.text = "$(server) SocratiCode";
-  item.tooltip = "Click to open the SocratiCode sidebar.";
+  item.tooltip = "Click to copy the SocratiCode indexing prompt for this workspace.";
   item.show();
 }
